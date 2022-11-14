@@ -20,7 +20,7 @@ namespace ServerSyncronization
             var options = new SyncOptions { };
 
             // [Required] Tables involved in the sync process:
-            var tables = new string[] {"Documents", "IntegrationUnits", "Offices" };
+            var tables = new string[] { "Employee", "EmployeeDetails", "Departements" };
             
             var setup = new SyncSetup(tables) 
             {
@@ -32,15 +32,24 @@ namespace ServerSyncronization
                 TriggersSuffix = "t"
             };
           
-            var documentsFilter = new SetupFilter("Documents");
-            documentsFilter.AddParameter("UserId", "Offices");
-            documentsFilter.AddJoin(Join.Inner, "Documents").On("IntegrationUnits","Id", "Documents","Id");
-            documentsFilter.AddJoin(Join.Inner, "IntegrationUnits").On("Offices", "Id", "IntegrationUnits", "OfficeId");
-            documentsFilter.AddWhere("ManagerId", "Offices", "UserId");
+            var documentsFilter = new SetupFilter("Employee");
+            documentsFilter.AddParameter("OfficeId", "Departements");
+            documentsFilter.AddJoin(Join.Inner, "EmployeeDetails").On("EmployeeDetails", "EmployeeId", "Employee", "Id");
+            documentsFilter.AddJoin(Join.Inner, "Departements").On("Departements", "Id", "EmployeeDetails", "DepartmentId");
+            documentsFilter.AddWhere("OfficeId", "Departements", "OfficeId");
             setup.Filters.Add(documentsFilter);
 
+
+
+            //var documentsFilter1 = new SetupFilter("Documents");
+            //documentsFilter1.AddParameter("UserId", "Offices");
+            //documentsFilter1.AddJoin(Join.Inner, "Documents").On("IntegrationUnits", "Id", "Documents", "Id");
+            //documentsFilter1.AddJoin(Join.Inner, "IntegrationUnits").On("Offices", "Id", "IntegrationUnits", "OfficeId");
+            //documentsFilter1.AddWhere("ManagerId", "Offices", "UserId");
+            //setup.Filters.Add(documentsFilter1);
+
             // [Required]: Add a SqlSyncProvider acting as the server hub.
-            services.AddSyncServer<SqlSyncProvider>(connectionString, setup, options);
+            services.AddSyncServer</*SqlSyncChangeTrackingProvider*/SqlSyncProvider>(connectionString, setup, options);
 
             return services;
         }
